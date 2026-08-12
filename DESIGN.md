@@ -15,9 +15,9 @@ The audio callback and direct DSP callees do not perform file, network, logging,
 
 ## UI
 
-The UI uses the strict DHN9 simple monochrome 8-bit contract: 4 px base spacing with 8 px major spacing, four-level palette `#050505`, `#2A2A2A`, `#8A8A86`, `#F2F2F0`, no external images, no external fonts, and no `GenericAudioProcessorEditor`. The editor default size remains 960 x 544 and the minimum remains 720 x 432.
+The UI uses the shared EHL JUCE design module contract: 4 px base spacing with 8 px major spacing, four-level palette `#050505`, `#2A2A2A`, `#8A8A86`, `#F2F2F0`, no external images, no external fonts, and no `GenericAudioProcessorEditor`. The editor default size is 640 x 360 and the minimum is 512 x 320.
 
-Every parameter has a visible slider with a stable component ID, accessible name, description, and tooltip. The paint layer is intentionally minimal: product name at `y=16`, compact function label at `y=48`, and one 1 px divider at `y=72`; controls start at absolute `y=80`. Do not add a full-canvas grid, tagline, package ID, decorative motif, fake visualizer, fake meter, panel frame, outer border, or parameter-driven atmospheric drawing. DSP behavior, parameter IDs, bundle identity, accessibility, and host automation identity are unchanged.
+Every parameter has a visible slider with a stable component ID, accessible name, description, and tooltip. The paint layer is intentionally minimal: product name begins at `y=8`, compact function label at `y=32`, and one 1 px divider at `y=56`; controls start at absolute `y=64`. Do not add a full-canvas grid, tagline, package ID, decorative motif, fake visualizer, fake meter, panel frame, outer border, or parameter-driven atmospheric drawing. DSP behavior, parameter IDs, bundle identity, accessibility, and host automation identity are unchanged.
 
 ## Safety Boundaries
 

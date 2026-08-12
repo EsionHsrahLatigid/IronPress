@@ -33,7 +33,10 @@ IronPressAudioProcessorEditor::IronPressAudioProcessorEditor(IronPressAudioProce
     : AudioProcessorEditor(&p), ownerProcessor(p),
       tooltipText("IronPress: feed-forward compressor controls with threshold, ratio, attack, release, knee, detector, sidechain, lookahead, pump, makeup, mix, and output.")
 {
-    setResizeLimits(minimumWidth, minimumHeight, defaultWidth * 2, defaultHeight * 2);
+    setLookAndFeel(&ehlLookAndFeel);
+    setResizeLimits(minimumWidth, minimumHeight,
+                    ehl::juce_design::Metrics::maximumWidth,
+                    ehl::juce_design::Metrics::maximumHeight);
     setResizable(true, true);
     setName("IronPress editor");
     setComponentID("ironpress-editor");
@@ -47,17 +50,20 @@ IronPressAudioProcessorEditor::IronPressAudioProcessorEditor(IronPressAudioProce
     setSize(defaultWidth, defaultHeight);
 }
 
+IronPressAudioProcessorEditor::~IronPressAudioProcessorEditor()
+{
+    for (auto& slider : sliders)
+        slider.setLookAndFeel(nullptr);
+    for (auto& label : labels)
+        label.setLookAndFeel(nullptr);
+    tooltipWindow.setLookAndFeel(nullptr);
+    setLookAndFeel(nullptr);
+}
+
 void IronPressAudioProcessorEditor::addControl(int index, const juce::String& parameterId, const juce::String& labelText, const juce::String& tip)
 {
     auto& slider = sliders[static_cast<std::size_t>(index)];
-    slider.setSliderStyle(juce::Slider::LinearHorizontal);
-    slider.setTextBoxStyle(juce::Slider::TextBoxRight, false, 72, 22);
-    slider.setColour(juce::Slider::trackColourId, juce::Colour(0xff8a8a86));
-    slider.setColour(juce::Slider::backgroundColourId, juce::Colour(0xff2a2a2a));
-    slider.setColour(juce::Slider::thumbColourId, juce::Colour(0xfff2f2f0));
-    slider.setColour(juce::Slider::textBoxTextColourId, juce::Colour(0xfff2f2f0));
-    slider.setColour(juce::Slider::textBoxBackgroundColourId, juce::Colour(0xff050505));
-    slider.setColour(juce::Slider::textBoxOutlineColourId, juce::Colour(0xff8a8a86));
+    ehl::juce_design::styleSlider(slider);
     slider.setComponentID("ironpress-" + parameterId);
     slider.setName("IronPress " + labelText);
     slider.setTitle(labelText);
@@ -68,8 +74,7 @@ void IronPressAudioProcessorEditor::addControl(int index, const juce::String& pa
 
     auto& label = labels[static_cast<std::size_t>(index)];
     label.setText(labelText, juce::dontSendNotification);
-    label.setJustificationType(juce::Justification::centredLeft);
-    label.setColour(juce::Label::textColourId, juce::Colour(0xfff2f2f0));
+    ehl::juce_design::styleLabel(label);
     label.setComponentID("ironpress-label-" + parameterId);
     label.setName(labelText);
     label.setTooltip(tip);
@@ -80,37 +85,13 @@ void IronPressAudioProcessorEditor::addControl(int index, const juce::String& pa
 
 void IronPressAudioProcessorEditor::paint(juce::Graphics& g)
 {
-    const auto area = getLocalBounds();
-    g.fillAll(juce::Colour(0xff050505));
-
-    g.setColour(juce::Colour(0xfff2f2f0));
-    g.setFont(juce::FontOptions(24.0f, juce::Font::bold));
-    g.drawText("IronPress", 32, 16, area.getWidth() - 64, 32, juce::Justification::centredLeft);
-
-    g.setColour(juce::Colour(0xff8a8a86));
-    g.setFont(juce::FontOptions(12.0f));
-    g.drawText("COMPRESSOR", 32, 48, area.getWidth() - 64, 16, juce::Justification::centredLeft);
-
-    g.setColour(juce::Colour(0xff2a2a2a));
-    g.drawHorizontalLine(72, 32.0f, static_cast<float>(area.getWidth() - 32));
+    ehl::juce_design::paintEditorChrome(g, getLocalBounds(), "IronPress", "COMPRESSOR");
 }
 
 void IronPressAudioProcessorEditor::resized()
 {
-    auto area = getLocalBounds().reduced(32);
-    area.removeFromTop(48);
-
-    const int rowHeight = 32;
-    const int rowGap = 8;
-    const int columnGap = 24;
-    const int columnWidth = (area.getWidth() - columnGap) / 2;
     for (int i = 0; i < static_cast<int>(sliders.size()); ++i)
-    {
-        const int column = i / 6;
-        const int row = i % 6;
-        const int x = area.getX() + column * (columnWidth + columnGap);
-        const int y = area.getY() + row * (rowHeight + rowGap);
-        labels[static_cast<std::size_t>(i)].setBounds(x, y, 86, rowHeight);
-        sliders[static_cast<std::size_t>(i)].setBounds(x + 90, y, columnWidth - 90, rowHeight);
-    }
+        ehl::juce_design::layoutLabelledControl(labels[static_cast<std::size_t>(i)],
+                                                sliders[static_cast<std::size_t>(i)],
+                                                ehl::juce_design::controlCell(getLocalBounds(), static_cast<std::size_t>(i)));
 }

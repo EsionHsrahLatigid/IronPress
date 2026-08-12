@@ -33,7 +33,6 @@ IronPressAudioProcessorEditor::IronPressAudioProcessorEditor(IronPressAudioProce
     : AudioProcessorEditor(&p), ownerProcessor(p),
       tooltipText("IronPress: feed-forward compressor controls with threshold, ratio, attack, release, knee, detector, sidechain, lookahead, pump, makeup, mix, and output.")
 {
-    setSize(defaultWidth, defaultHeight);
     setResizeLimits(minimumWidth, minimumHeight, defaultWidth * 2, defaultHeight * 2);
     setResizable(true, true);
     setName("IronPress editor");
@@ -44,6 +43,8 @@ IronPressAudioProcessorEditor::IronPressAudioProcessorEditor(IronPressAudioProce
 
     for (int i = 0; i < static_cast<int>(std::size(controls)); ++i)
         addControl(i, controls[i].id, controls[i].label, controls[i].tip);
+
+    setSize(defaultWidth, defaultHeight);
 }
 
 void IronPressAudioProcessorEditor::addControl(int index, const juce::String& parameterId, const juce::String& labelText, const juce::String& tip)
@@ -51,11 +52,12 @@ void IronPressAudioProcessorEditor::addControl(int index, const juce::String& pa
     auto& slider = sliders[static_cast<std::size_t>(index)];
     slider.setSliderStyle(juce::Slider::LinearHorizontal);
     slider.setTextBoxStyle(juce::Slider::TextBoxRight, false, 72, 22);
-    slider.setColour(juce::Slider::trackColourId, juce::Colour(0xffd8d8d8));
-    slider.setColour(juce::Slider::backgroundColourId, juce::Colour(0xff202020));
-    slider.setColour(juce::Slider::thumbColourId, juce::Colour(0xffffffff));
-    slider.setColour(juce::Slider::textBoxTextColourId, juce::Colour(0xfff0f0f0));
-    slider.setColour(juce::Slider::textBoxBackgroundColourId, juce::Colour(0xff111111));
+    slider.setColour(juce::Slider::trackColourId, juce::Colour(0xff8a8a86));
+    slider.setColour(juce::Slider::backgroundColourId, juce::Colour(0xff2a2a2a));
+    slider.setColour(juce::Slider::thumbColourId, juce::Colour(0xfff2f2f0));
+    slider.setColour(juce::Slider::textBoxTextColourId, juce::Colour(0xfff2f2f0));
+    slider.setColour(juce::Slider::textBoxBackgroundColourId, juce::Colour(0xff050505));
+    slider.setColour(juce::Slider::textBoxOutlineColourId, juce::Colour(0xff8a8a86));
     slider.setComponentID("ironpress-" + parameterId);
     slider.setName("IronPress " + labelText);
     slider.setTitle(labelText);
@@ -67,7 +69,7 @@ void IronPressAudioProcessorEditor::addControl(int index, const juce::String& pa
     auto& label = labels[static_cast<std::size_t>(index)];
     label.setText(labelText, juce::dontSendNotification);
     label.setJustificationType(juce::Justification::centredLeft);
-    label.setColour(juce::Label::textColourId, juce::Colour(0xffeeeeee));
+    label.setColour(juce::Label::textColourId, juce::Colour(0xfff2f2f0));
     label.setComponentID("ironpress-label-" + parameterId);
     label.setName(labelText);
     label.setTooltip(tip);
@@ -81,42 +83,22 @@ void IronPressAudioProcessorEditor::paint(juce::Graphics& g)
     const auto area = getLocalBounds();
     g.fillAll(juce::Colour(0xff050505));
 
-    constexpr int grid = 8;
-    g.setColour(juce::Colour(0xff202020));
-    for (int x = 0; x < area.getWidth(); x += grid)
-        g.drawVerticalLine(x, 0.0f, static_cast<float>(area.getHeight()));
-    for (int y = 0; y < area.getHeight(); y += grid)
-        g.drawHorizontalLine(y, 0.0f, static_cast<float>(area.getWidth()));
+    g.setColour(juce::Colour(0xfff2f2f0));
+    g.setFont(juce::FontOptions(24.0f, juce::Font::bold));
+    g.drawText("IronPress", 32, 16, area.getWidth() - 64, 32, juce::Justification::centredLeft);
 
-    g.setColour(juce::Colour(0xffeeeeee));
-    g.setFont(juce::FontOptions(32.0f, juce::Font::bold));
-    g.drawText("IronPress", 32, 24, area.getWidth() - 64, 40, juce::Justification::centredLeft);
-    g.setFont(juce::FontOptions(15.0f));
-    g.drawText("jp.ehl.ironpress / IrPr", 34, 64, area.getWidth() - 68, 22, juce::Justification::centredLeft);
+    g.setColour(juce::Colour(0xff8a8a86));
+    g.setFont(juce::FontOptions(12.0f));
+    g.drawText("COMPRESSOR", 32, 48, area.getWidth() - 64, 16, juce::Justification::centredLeft);
 
-    const float reduction = juce::jlimit(0.0f, 1.0f, -ownerProcessor.dsp.currentGainDb() / 36.0f);
-    const auto meter = juce::Rectangle<int>(area.getWidth() - 220, 30, 180, 64);
-    g.setColour(juce::Colour(0xff404040));
-    g.drawRect(meter, 2);
-    g.setColour(juce::Colour(0xffd8d8d8));
-    for (int x = 0; x < static_cast<int>(static_cast<float>(meter.getWidth()) * reduction); x += 12)
-        g.fillRect(meter.getX() + x, meter.getY() + 8, 8, meter.getHeight() - 16);
-
-    g.setColour(juce::Colour(0xfff2f2f2));
-    const int pressBase = area.getHeight() - 56;
-    for (int x = 32; x < area.getWidth() - 32; x += 24)
-    {
-        const int h = 12 + ((x / 24) % 7) * 7;
-        g.fillRect(x, pressBase - h, 8, h);
-    }
-    g.setColour(juce::Colour(0xff707070));
-    g.fillRect(32, pressBase + 8, area.getWidth() - 64, 8);
+    g.setColour(juce::Colour(0xff2a2a2a));
+    g.drawHorizontalLine(72, 32.0f, static_cast<float>(area.getWidth() - 32));
 }
 
 void IronPressAudioProcessorEditor::resized()
 {
     auto area = getLocalBounds().reduced(32);
-    area.removeFromTop(88);
+    area.removeFromTop(48);
 
     const int rowHeight = 32;
     const int rowGap = 8;

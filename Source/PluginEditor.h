@@ -8,7 +8,8 @@
 
 class IronPressAudioProcessor;
 
-class IronPressAudioProcessorEditor final : public juce::AudioProcessorEditor
+class IronPressAudioProcessorEditor final : public juce::AudioProcessorEditor,
+                                           private juce::Timer
 {
 public:
     explicit IronPressAudioProcessorEditor(IronPressAudioProcessor&);
@@ -27,9 +28,12 @@ private:
     using SliderAttachment = juce::AudioProcessorValueTreeState::SliderAttachment;
 
     void addControl(int index, const juce::String& parameterId, const juce::String& labelText, const juce::String& tip);
+    void timerCallback() override;
+    void updateParameterDisplay();
 
     IronPressAudioProcessor& ownerProcessor;
     ehl::juce_design::LookAndFeel ehlLookAndFeel;
+    ehl::juce_design::ParameterDisplay parameterDisplay { ehl::juce_design::DisplayKind::compressor };
     juce::TooltipWindow tooltipWindow { this, 700 };
     juce::String tooltipText;
     std::array<juce::Slider, 12> sliders;

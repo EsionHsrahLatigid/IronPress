@@ -2,6 +2,8 @@
 #include "PluginProcessor.h"
 #include "ParameterIDs.h"
 
+#include <cmath>
+
 namespace
 {
 struct ControlSpec
@@ -27,6 +29,12 @@ constexpr ControlSpec controls[] {
 };
 
 static_assert(std::size(controls) == 12);
+
+float normalizedSliderValue(juce::Slider& slider) noexcept
+{
+    const auto normalized = static_cast<float>(slider.valueToProportionOfLength(slider.getValue()));
+    return std::isfinite(normalized) ? juce::jlimit(0.0f, 1.0f, normalized) : 0.0f;
+}
 } // namespace
 
 IronPressAudioProcessorEditor::IronPressAudioProcessorEditor(IronPressAudioProcessor& p)
@@ -44,14 +52,23 @@ IronPressAudioProcessorEditor::IronPressAudioProcessorEditor(IronPressAudioProce
     setDescription("IronPress monochrome 8-bit compressor editor");
     setWantsKeyboardFocus(true);
 
+    parameterDisplay.setComponentID("ironpress-parameter-display");
+    parameterDisplay.setName("IronPress parameter display");
+    parameterDisplay.setInterceptsMouseClicks(false, false);
+    parameterDisplay.setWantsKeyboardFocus(false);
+    addAndMakeVisible(parameterDisplay);
+
     for (int i = 0; i < static_cast<int>(std::size(controls)); ++i)
         addControl(i, controls[i].id, controls[i].label, controls[i].tip);
 
+    updateParameterDisplay();
+    startTimerHz(30);
     setSize(defaultWidth, defaultHeight);
 }
 
 IronPressAudioProcessorEditor::~IronPressAudioProcessorEditor()
 {
+    stopTimer();
     for (auto& slider : sliders)
         slider.setLookAndFeel(nullptr);
     for (auto& label : labels)
@@ -90,8 +107,23 @@ void IronPressAudioProcessorEditor::paint(juce::Graphics& g)
 
 void IronPressAudioProcessorEditor::resized()
 {
+    parameterDisplay.setBounds(ehl::juce_design::parameterDisplayArea(getLocalBounds()));
+
     for (int i = 0; i < static_cast<int>(sliders.size()); ++i)
         ehl::juce_design::layoutLabelledControl(labels[static_cast<std::size_t>(i)],
                                                 sliders[static_cast<std::size_t>(i)],
                                                 ehl::juce_design::controlCell(getLocalBounds(), static_cast<std::size_t>(i)));
+}
+
+void IronPressAudioProcessorEditor::timerCallback()
+{
+    updateParameterDisplay();
+}
+
+void IronPressAudioProcessorEditor::updateParameterDisplay()
+{
+    parameterDisplay.setValues({ normalizedSliderValue(sliders[0]),
+                                 normalizedSliderValue(sliders[1]),
+                                 normalizedSliderValue(sliders[2]),
+                                 normalizedSliderValue(sliders[3]) });
 }

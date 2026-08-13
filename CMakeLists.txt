@@ -53,6 +53,22 @@ if(IRONPRESS_BUILD_PLUGIN)
         list(APPEND IRONPRESS_FORMATS AU)
     endif()
 
+    set(EHL_COPY_PLUGIN_AFTER_BUILD_DEFAULT OFF)
+    if(APPLE AND NOT DEFINED ENV{CI})
+        set(EHL_COPY_PLUGIN_AFTER_BUILD_DEFAULT ON)
+    endif()
+    option(EHL_COPY_PLUGIN_AFTER_BUILD
+        "Copy built plug-in formats to the current user's standard plug-in folders"
+        ${EHL_COPY_PLUGIN_AFTER_BUILD_DEFAULT})
+
+    set(EHL_PLUGIN_COPY_ARGS
+        COPY_PLUGIN_AFTER_BUILD ${EHL_COPY_PLUGIN_AFTER_BUILD})
+    if(APPLE)
+        list(APPEND EHL_PLUGIN_COPY_ARGS
+            VST3_COPY_DIR "$ENV{HOME}/Library/Audio/Plug-Ins/VST3"
+            AU_COPY_DIR "$ENV{HOME}/Library/Audio/Plug-Ins/Components")
+    endif()
+
     juce_add_plugin(IronPress
         VERSION ${PROJECT_VERSION}
         COMPANY_NAME "EsionHsrahLatigid"
@@ -69,7 +85,7 @@ if(IRONPRESS_BUILD_PLUGIN)
         EDITOR_WANTS_KEYBOARD_FOCUS TRUE
         MICROPHONE_PERMISSION_ENABLED TRUE
         MICROPHONE_PERMISSION_TEXT "IronPress processes live audio input."
-        COPY_PLUGIN_AFTER_BUILD FALSE)
+        ${EHL_PLUGIN_COPY_ARGS})
 
     target_sources(IronPress PRIVATE
         Source/ParameterIDs.h

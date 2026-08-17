@@ -1,6 +1,6 @@
 # IronPress
 
-IronPress is an EHL Digital Harsh Noise compressor built as a JUCE audio effect. It is a violent dynamics instrument: a feed-forward log-domain compressor with peak/RMS detector morphing, soft/hard knee behavior, sidechain high-pass filtering, fixed reported lookahead latency, bounded pump/makeup, dry/wet mix, and output trim.
+IronPress is an EsionHsrahLatigid saturation compressor built as a JUCE audio effect. It uses feed-forward log-domain compression with peak/RMS detector morphing, soft/hard knee behavior, sidechain high-pass filtering, fixed reported lookahead latency, bounded pump/makeup, dry/wet mix, and output trim.
 
 It is not a mastering compressor, loudness processor, true-peak limiter, or hearing-safety device. The output guard prevents non-finite samples and excessive digital amplitude inside the plugin, but it does not guarantee safe SPL, safe monitoring levels, or listener protection.
 
